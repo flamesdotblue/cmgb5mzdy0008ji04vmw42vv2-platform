@@ -1,28 +1,50 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import Header from './components/Header'
+import HUD from './components/HUD'
+import ControlsHelp from './components/ControlsHelp'
+import GameCanvas from './components/GameCanvas'
+import RestartButton from './components/RestartButton'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [score, setScore] = useState(0)
+  const [games, setGames] = useState(0)
+  const [status, setStatus] = useState('Ready')
+
+  const handleScore = useCallback(() => {
+    setScore((s) => s + 1)
+    setStatus('Nice! You made it across!')
+    setTimeout(() => setStatus('Cross again for more points'), 1200)
+  }, [])
+
+  const handleGameOver = useCallback(() => {
+    setStatus('Bonk! Watch the cars!')
+    setTimeout(() => setStatus('Try again'), 1200)
+  }, [])
+
+  const handleRestart = () => {
+    setScore(0)
+    setGames((g) => g + 1) // signal to reset the game scene
+    setStatus('Ready')
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-slate-100">
+      <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4">
+        <Header />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+          <div className="lg:col-span-3 rounded-xl overflow-hidden border border-slate-700 bg-slate-900/40">
+            <GameCanvas onScore={handleScore} onGameOver={handleGameOver} resetSignal={games} />
+          </div>
+          <div className="space-y-4">
+            <HUD score={score} status={status} />
+            <ControlsHelp />
+            <RestartButton onClick={handleRestart} />
+          </div>
         </div>
+        <p className="text-center text-xs text-slate-400">
+          Arrow keys to move. Cross all lanes without touching cars.
+        </p>
       </div>
     </div>
   )
 }
-
-export default App
